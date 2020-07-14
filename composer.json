@@ -1,0 +1,21 @@
+{
+  "name": "rlmumford/bridgecomm",
+  "type": "library",
+  "description": "A library for interacting with BridgePay's bridgecomm",
+  "authors": [
+    {
+      "name": "Rob Mumford",
+      "email": "rlmumford@googlemail.com"
+    }
+  ],
+  "require": {
+    "php": "^7.2.5",
+    "guzzlehttp/guzzle": "^6.3|^7.0"
+  },
+  "minimum-stability": "dev",
+  "autoload": {
+    "psr-4": {
+      "BridgeComm\\": "src/"
+    }
+  }
+}
