@@ -47,7 +47,7 @@ abstract class RequestMessage implements RequestMessageInterface {
   }
 
   public function toXml(\DOMDocument $doc = NULL): \DOMNode {
-    $return = $doc ? 'doc' : 'message';
+    $return = $doc ? 'message' : 'doc';
     $doc = $doc ?: new \DOMDocument('1.0', 'utf-8');
     $message = $doc->createElement('requestMessage');
     $this->buildMessageXml($message, $doc);

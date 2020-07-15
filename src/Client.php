@@ -2,6 +2,8 @@
 
 namespace BridgeComm;
 
+use BridgeComm\Exception\RequestException;
+use BridgeComm\Exception\ResponseException;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\GuzzleException;
@@ -17,6 +19,17 @@ class Client {
    * @var \BridgeComm\ResponseFactory
    */
   protected $responseFactory;
+
+  /**
+   * Client constructor.
+   *
+   * @param \GuzzleHttp\ClientInterface|null $http
+   * @param \BridgeComm\ResponseFactory|null $response_factory
+   */
+  public function __construct(ClientInterface $http = NULL, ResponseFactory $response_factory = NULL) {
+    $this->http = $http;
+    $this->responseFactory = $response_factory;
+  }
 
   /**
    * Get the http client.
@@ -45,6 +58,15 @@ class Client {
     return "";
   }
 
+  /**
+   * Send a request to BridgeComm
+   *
+   * @param \BridgeComm\RequestInterface $request
+   *
+   * @return \BridgeComm\ResponseInterface
+   * @throws \BridgeComm\Exception\RequestException
+   * @throws \BridgeComm\Exception\ResponseException
+   */
   public function sendRequest(RequestInterface $request): ResponseInterface {
     try {
       $content = new \DOMDocument('1.0');
@@ -84,22 +106,23 @@ class Client {
 
       $response_xml = simplexml_load_string((string) $response->getBody());
       $result = $response_xml->xpath(
-        '//s:Body/ProcessRequestResponse/ProcessRequestResult'
+        '//s:Body'
       );
 
-      if (!$result) {
-        throw new \Exception($response->getBody());
+      if (empty($result)) {
+        throw new RequestException('Invalid XML response.', '', NULL, $request);
       }
-      $result_string = base64_decode((string) $result[0]);
+      $result_string = base64_decode((string) reset($result)->ProcessRequestResponse->ProcessRequestResult);
       $result_xml = simplexml_load_string($result_string);
 
-      return $this->responseFactory()->createFromXml($result_xml, $request);
-    }
-    catch (ClientException $exception) {
-      throw $exception;
+      $response = $this->responseFactory()->createFromXml($result_xml, $request);
+      if ($response->isError()) {
+        throw new ResponseException($response);
+      }
+      return $response;
     }
     catch (GuzzleException $exception) {
-      throw $exception;
+      throw new RequestException($exception->getMessage(), $exception->getCode(), $exception, $request);
     }
   }
 }

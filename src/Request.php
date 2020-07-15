@@ -105,6 +105,7 @@ class Request implements RequestInterface {
   public function toXml(): string {
     $xml = new \DOMDocument('1.0', 'utf-8');
     $root = $xml->createElement('requestHeader');
+    $xml->appendChild($root);
 
     $root->appendChild($xml->createElement('ClientIdentifier', 'SOAP'));
     $root->appendChild($xml->createElement('RequestType', $this->getRequestType()));
@@ -120,7 +121,6 @@ class Request implements RequestInterface {
       $root->appendChild($message->toXml($xml));
     }
 
-    $xml->appendChild($root);
     return $xml->saveXML();
   }
 }
