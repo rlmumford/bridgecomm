@@ -111,8 +111,7 @@ class Request implements RequestInterface {
     $root->appendChild($xml->createElement('RequestType', $this->getRequestType()));
     $root->appendChild($xml->createElement('RequestDateTime', $this->getRequestDateTime()->format('YmdHis')));
     if ($this->credentials) {
-      $root->appendChild($xml->createElement('User', $this->credentials->getUser()));
-      $root->appendChild($xml->createElement('Password', $this->credentials->getPassword()));
+      $this->credentials->applyToXml($root, $xml);
     }
     if ($id = $this->getTransactionId()) {
       $root->appendChild($xml->createElement('TransactionId', $id));

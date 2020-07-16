@@ -6,26 +6,46 @@ namespace BridgeComm;
 
 class RequestCredentials implements RequestCredentialsInterface {
 
+  /**
+   * @var string
+   */
   protected $user;
 
+  /**
+   * @var string
+   */
   protected $password;
 
+  /**
+   * RequestCredentials constructor.
+   *
+   * @param string $user
+   * @param string $password
+   */
   public function __construct(string $user, string $password) {
     $this->user = $user;
     $this->password = $password;
   }
 
   /**
-   * @inheritDoc
+   * {@inheritdoc}
    */
-  public function getUser(): string {
+  public function applyToXML(\DOMElement $request, \DOMDocument $document): void {
+    $request->appendChild($document->createElement('User', $this->getUser()));
+    $request->appendChild($document->createElement('Password', $this->getPassword()));
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function getUser(): string {
     return $this->user;
   }
 
   /**
-   * @inheritDoc
+   * {@inheritdoc}
    */
-  public function getPassword(): string {
+  protected function getPassword(): string {
     return $this->password;
   }
 }

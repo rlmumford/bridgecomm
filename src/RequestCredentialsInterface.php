@@ -5,17 +5,10 @@ namespace BridgeComm;
 interface RequestCredentialsInterface {
 
   /**
-   * Username
+   * Apply these credentials to the xml.
    *
-   * @return string
+   * @param \DOMElement $request
+   * @param \DOMDocument $document
    */
-  public function getUser(): string;
-
-  /**
-   * Get the password.
-   *
-   * @return string
-   */
-  public function getPassword(): string;
-
+  public function applyToXML(\DOMElement $request, \DOMDocument $document): void;
 }
