@@ -9,8 +9,12 @@ use BridgeComm\RequestCredentials;
 use BridgeComm\RequestFactory;
 use BridgeComm\RequestMessage\CardTokenRequestMessage;
 use BridgeComm\RequestMessage\PingRequestMessage;
+use BridgeComm\RequestMessage\TokenizeAccountRequestMessage;
+use BridgeComm\RequestMessage\VoidRefundRequestMessage;
 use BridgeComm\ResponseInterface;
 use BridgeComm\ResponseMessage\CardTokenResponseMessage;
+use BridgeComm\ResponseMessage\TokenizeAccountResponseMessage;
+use BridgeComm\ResponseMessage\VoidRefundResponseMessage;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\Psr7\Response;
 use PHPUnit\Framework\TestCase;
@@ -37,7 +41,7 @@ class ClientTest extends TestCase {
    */
   protected function setUp(): void {
     $this->mockHandler = new MockHandler();
-    $this->requestFactory = new RequestFactory();
+    $this->requestFactory = new RequestFactory(new TestRequestDefaults());
     $this->client = new Client(
       new \GuzzleHttp\Client([
         'handler' => $this->mockHandler,
@@ -58,8 +62,7 @@ class ClientTest extends TestCase {
 </Ping>")
     ));
     $request = $this->requestFactory->createRequest(
-      $this->requestFactory->createRequestMessage(Request::R_PING),
-      new RequestCredentials('test', 'test')
+      $this->requestFactory->createRequestMessage(Request::R_PING)
     );
     $request->setTransactionId(uniqid());
 
@@ -85,10 +88,8 @@ class ClientTest extends TestCase {
 </ErrorResponse>")
     ));
     $request = $this->requestFactory->createRequest(
-      $this->requestFactory->createRequestMessage(Request::R_PING),
-      new RequestCredentials('test', 'test')
+      $this->requestFactory->createRequestMessage(Request::R_PING)
     );
-    $request->setTransactionId(uniqid());
 
     $this->assertInstanceOf(Request::class, $request);
     $this->assertInstanceOf(PingRequestMessage::class, $request->getMessage());
@@ -129,19 +130,12 @@ class ClientTest extends TestCase {
 
     /** @var \BridgeComm\RequestMessage\CardTokenRequestMessage $message */
     $message = $this->requestFactory->createRequestMessage(Request::R_MULTI_TOKEN);
-    $message->setMerchantAccountCode(uniqid());
-    $message->setMerchantCode(uniqid());
-    $message->setSoftwareVendor('php');
     $this->assertInstanceOf(CardTokenRequestMessage::class, $message);
 
     $message->setPaymentAccountNumber('5439750001500347');
     $message->setExpirationDate('12/29');
 
-    $request = $this->requestFactory->createRequest(
-      $message,
-      new RequestCredentials('test', 'test')
-    );
-    $request->setTransactionId($trans_id);
+    $request = $this->requestFactory->createRequest($message, $trans_id);
 
     $this->assertInstanceOf(Request::class, $request);
 
@@ -160,4 +154,78 @@ class ClientTest extends TestCase {
     $this->assertEquals('1229', $message->getExpirationDate());
   }
 
+  public function testVoidRefundRequest() {
+    $this->mockHandler->append(new Response(
+      200,
+      [],
+      ResponseHelper::wrapResult("<?xml version=\"1.0\" encoding=\"utf-8\"?>
+<VoidRefund>
+<TransactionID>12345</TransactionID>
+<RequestType>012</RequestType>
+<ResponseCode>00000</ResponseCode>
+<ResponseDescription>Successful Request</ResponseDescription>
+<responseMessage><ReferenceNumber />
+<GatewayTransID>235539604</GatewayTransID>
+<GatewayMessage>A07 - Partial Void Posted</GatewayMessage>
+<GatewayResult>00000</GatewayResult>
+<TransactionCode>12345</TransactionCode>
+<RemainingAmount>3000</RemainingAmount>
+<MerchantAccountCode />
+<ResponseType>void</ResponseType>
+<ResponseTypeDescription>void</ResponseTypeDescription>
+</responseMessage>
+</VoidRefund>")
+    ));
+
+    /** @var \BridgeComm\RequestMessage\VoidRefundRequestMessage $message */
+    $message = $this->requestFactory->createRequestMessage(Request::R_VOID_REFUND);
+    $this->assertInstanceOf(VoidRefundRequestMessage::class, $message);
+    $message->setTransactionType(VoidRefundRequestMessage::TT_VOID);
+    $message->setTransactionCode('12345');
+    $message->setAmount(1500);
+    $message->setReferenceNumber('235539604');
+
+    $request = $this->requestFactory->createRequest($message, '12345');
+    $this->assertInstanceOf(Request::class, $request);
+
+    $response = $this->client->sendRequest($request);
+    $this->assertInstanceOf(ResponseInterface::class, $response);
+
+    /** @var \BridgeComm\ResponseMessage\VoidRefundResponseMessage $message */
+    $message = $response->getMessage();
+    $this->assertInstanceOf(VoidRefundResponseMessage::class, $message);
+    $this->assertEquals('12345', $message->getTransactionCode());
+    $this->assertEquals(3000, $message->getRemainingAmount());
+    $this->assertEquals('void', $message->getResponseType());
+  }
+
+  public function testTokenizeAccountRequest() {
+    $this->mockHandler->append(new Response(
+      200,
+      [],
+      ResponseHelper::wrapResult("<?xml version=\"1.0\" encoding=\"utf-8\"?>
+<GetToken>
+  <TransactionID>1234</TransactionID>
+  <RequestType>013</RequestType>
+  <ResponseCode>00000</ResponseCode>
+  <ResponseDescription>Successful Request</ResponseDescription>
+  <responseMessage>
+    <Token>11110000000000279992</Token>
+  </responseMessage>
+</GetToken>")
+    ));
+
+    /** @var \BridgeComm\RequestMessage\TokenizeAccountRequestMessage $message */
+    $message = $this->requestFactory->createRequestMessage(Request::R_ACCOUNT_TOKEN);
+    $this->assertInstanceOf(TokenizeAccountRequestMessage::class, $message);
+    $message->setAchAccount('4099999992');
+
+    $request = $this->requestFactory->createRequest($message, '1234');
+    $response = $this->client->sendRequest($request);
+
+    /** @var \BridgeComm\ResponseMessage\TokenizeAccountResponseMessage $message */
+    $message = $response->getMessage();
+    $this->assertInstanceOf(TokenizeAccountResponseMessage::class, $message);
+    $this->assertEquals('11110000000000279992', $message->getToken());
+  }
 }

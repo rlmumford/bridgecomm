@@ -4,12 +4,16 @@ namespace BridgeComm;
 
 use BridgeComm\ResponseMessage\CardTokenResponseMessage;
 use BridgeComm\ResponseMessage\ProcessPaymentResponseMessage;
+use BridgeComm\ResponseMessage\TokenizeAccountResponseMessage;
+use BridgeComm\ResponseMessage\VoidRefundResponseMessage;
 
 class ResponseFactory {
 
   const RESPONSE_CLASSES = [
     Request::R_MULTI_TOKEN => CardTokenResponseMessage::class,
     Request::R_PROCESS_PAYMENT => ProcessPaymentResponseMessage::class,
+    Request::R_VOID_REFUND => VoidRefundResponseMessage::class,
+    Request::R_ACCOUNT_TOKEN => TokenizeAccountResponseMessage::class
   ];
 
   /**

@@ -13,11 +13,11 @@ class RequestFactoryTest extends TestCase {
 
   public function testUnsupportedRequestType() {
     $this->expectException(UnsupportedRequestTypeException::class);
-    (new RequestFactory())->createRequestMessage('076');
+    (new RequestFactory(new TestRequestDefaults()))->createRequestMessage('076');
   }
 
   public function testProcessPaymentRequestMessage() {
-    $factory = new RequestFactory();
+    $factory = new RequestFactory(new TestRequestDefaults());
 
     /** @var ProcessPaymentRequestMessage $message */
     $message = $factory->createRequestMessage(Request::R_PROCESS_PAYMENT);
