@@ -96,4 +96,13 @@ class ProcessPaymentResponseMessage implements ResponseMessageInterface {
       $this->cardType = $card_info['type'];
     }
   }
+
+  /**
+   * Get gateway trans id
+   *
+   * @return string
+   */
+  public function getGatewayTransID(): string {
+    return $this->gatewayTransID;
+  }
 }

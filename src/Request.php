@@ -114,7 +114,7 @@ class Request implements RequestInterface {
       $this->credentials->applyToXml($root, $xml);
     }
     if ($id = $this->getTransactionId()) {
-      $root->appendChild($xml->createElement('TransactionId', $id));
+      $root->appendChild($xml->createElement('TransactionID', $id));
     }
     if ($message = $this->getMessage()) {
       $root->appendChild($message->toXml($xml));

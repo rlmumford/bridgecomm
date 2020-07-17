@@ -55,7 +55,7 @@ class Client {
    * @return string
    */
   protected function url(): string {
-    return "";
+    return "RequestHandler.svc";
   }
 
   /**
@@ -72,7 +72,7 @@ class Client {
       $content = new \DOMDocument('1.0');
       $envelope = $content->createElement('soap:Envelope');
       $envelope->setAttribute(
-        'xmlns:soapenv',
+        'xmlns:soap',
         'http://schemas.xmlsoap.org/soap/envelope/'
       );
       $envelope->setAttribute(

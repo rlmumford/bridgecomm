@@ -6,7 +6,7 @@ use BridgeComm\RequestMessage;
 
 class ProcessPaymentRequestMessage extends RequestMessage {
 
-  const REQUEST_TYPE = 'OO4';
+  const REQUEST_TYPE = '004';
 
   /**
    * Account type constants
@@ -128,6 +128,16 @@ class ProcessPaymentRequestMessage extends RequestMessage {
   protected $accountZip;
 
   protected $accountPhone;
+
+  /**
+   * @param string $type
+   *
+   * @return \BridgeComm\RequestMessage\ProcessPaymentRequestMessage
+   */
+  public function setAccountType(string $type): ProcessPaymentRequestMessage {
+    $this->acctType = $type;
+    return $this;
+  }
 
   /**
    * Set the amount.
