@@ -2,6 +2,7 @@
   "name": "rlmumford/bridgecomm",
   "type": "library",
   "description": "A library for interacting with BridgePay's bridgecomm",
+  "license": "GPL-3.0-or-later",
   "authors": [
     {
       "name": "Rob Mumford",
