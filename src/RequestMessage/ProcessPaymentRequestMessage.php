@@ -223,8 +223,15 @@ class ProcessPaymentRequestMessage extends RequestMessage {
    *
    * @return \BridgeComm\RequestMessage\ProcessPaymentRequestMessage
    */
-  public function setToken(string $token): ProcessPaymentRequestMessage {
+  public function setCardToken(string $token, string $expiration, string $card_type = self::AT_CREDIT_CARD): ProcessPaymentRequestMessage {
     $this->token = $token;
+    $this->expirationDate = $expiration;
+    $this->acctType = $card_type;
+
+    if (empty($this->transIndustryType)) {
+      $this->transIndustryType = static::ITC_ECOMMERCE;
+    }
+
     return $this;
   }
 
@@ -288,6 +295,7 @@ class ProcessPaymentRequestMessage extends RequestMessage {
 
     if (!empty($this->token)) {
       $message->appendChild($document->createElement('Token', $this->token));
+      $message->appendChild($document->createElement('ExpirationDate', $this->expirationDate));
     }
     else if (!empty($this->paymentAccountNumber)) {
       $message->appendChild($document->createElement('PaymentAccountNumber', $this->paymentAccountNumber));

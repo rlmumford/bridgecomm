@@ -49,7 +49,6 @@ class LiveClientTest extends TestCase {
     $response = $this->client->sendRequest($request);
     $this->assertFalse($response->isError(), 'PING Request Successful');
   }
-
   public function testLiveCardTokenRequest() {
     /** @var \BridgeComm\RequestMessage\CardTokenRequestMessage $message */
     $message = $this->requestFactory->createRequestMessage(Request::R_MULTI_TOKEN);
@@ -78,11 +77,8 @@ class LiveClientTest extends TestCase {
     // Next test taking a payment with the token.
     /** @var \BridgeComm\RequestMessage\ProcessPaymentRequestMessage $message */
     $message = $this->requestFactory->createRequestMessage(Request::R_PROCESS_PAYMENT);
-    $message->setToken($token_response->getToken())
-      ->setAmount('100')
-      ->setTransIndustryType(ProcessPaymentRequestMessage::ITC_ECOMMERCE)
-      ->setHolderType(ProcessPaymentRequestMessage::HT_PERSONAL)
-      ->setAccountType(ProcessPaymentRequestMessage::AT_CREDIT_CARD);
+    $message->setCardToken($token_response->getToken(), '12/29')
+      ->setAmount('500');
     $request = $this->requestFactory->createRequest($message);
 
     try {
@@ -97,6 +93,7 @@ class LiveClientTest extends TestCase {
     $this->assertFalse($response->isError(), 'Response is not an error.');
     $this->assertInstanceOf(ProcessPaymentResponseMessage::class, $response->getMessage());
   }
+
 
   public function testLiveProcessPaymentRequest() {
     /** @var \BridgeComm\RequestMessage\ProcessPaymentRequestMessage $message */

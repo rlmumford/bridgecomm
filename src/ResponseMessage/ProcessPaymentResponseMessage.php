@@ -91,9 +91,9 @@ class ProcessPaymentResponseMessage implements ResponseMessageInterface {
     }
     if (!empty($card_info)) {
       $this->cardClass = $card_info['class'];
-      $this->cardHolderName = $card_info['holder_name'];
-      $this->cardModifier = $card_info['modifier'];
-      $this->cardType = $card_info['type'];
+      $this->cardHolderName = !empty($card_info['holder_name']) ? $card_info['holder_name'] : '';
+      $this->cardModifier = !empty($card_info['modifier']) ? $card_info['modifier'] : '';
+      $this->cardType = !empty($card_info['type']) ? $card_info['type'] : '';
     }
   }
 
